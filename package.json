@@ -1,0 +1,17 @@
+{
+  "name": "right-or-left-voting",
+  "version": "1.0.0",
+  "description": "Real-time voting system for educational presentations",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["voting", "education", "websocket"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  }
+}

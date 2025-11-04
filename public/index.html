@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Right or Left 投票システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 20px 40px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-presenter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-student {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .info {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .info h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .info ul {
+            color: #666;
+            line-height: 1.8;
+            margin-left: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .btn {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗳️ Right or Left</h1>
+        <p class="subtitle">リアルタイム投票システム</p>
+
+        <div class="buttons">
+            <a href="/presenter" class="btn btn-presenter">
+                👨‍🏫 教員用画面
+            </a>
+            <a href="/student" class="btn btn-student">
+                👨‍🎓 学生用画面
+            </a>
+        </div>
+
+        <div class="info">
+            <h2>使い方</h2>
+            <ul>
+                <li><strong>教員：</strong>投票の開始・結果表示をコントロール</li>
+                <li><strong>学生：</strong>左側または右側を選択して投票</li>
+                <li>リアルタイムで投票結果を集計・表示</li>
+                <li>複数回の投票セッションに対応</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

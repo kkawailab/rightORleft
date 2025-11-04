@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教員用画面 - Right or Left 投票システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .status.waiting {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.active {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status.results {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            min-width: 150px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-start {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            background: #45a049;
+        }
+
+        .btn-show {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-show:hover:not(:disabled) {
+            background: #0b7dda;
+        }
+
+        .btn-reset {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-reset:hover:not(:disabled) {
+            background: #e68900;
+        }
+
+        .vote-info {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .results-display {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-label {
+            width: 100px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .result-label.left {
+            color: #e91e63;
+        }
+
+        .result-label.right {
+            color: #3f51b5;
+        }
+
+        .result-bar-container {
+            flex: 1;
+            height: 50px;
+            background: #f0f0f0;
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .result-bar {
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .result-bar.left {
+            background: linear-gradient(90deg, #e91e63, #f06292);
+        }
+
+        .result-bar.right {
+            background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+        }
+
+        .connection-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .connection-status.connected {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .connection-status.disconnected {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            button {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 教員用コントロール画面</h1>
+
+        <div id="connectionStatus" class="connection-status disconnected">
+            接続中...
+        </div>
+
+        <div id="status" class="status waiting">
+            待機中
+        </div>
+
+        <div class="controls">
+            <button id="startBtn" class="btn-start">投票開始</button>
+            <button id="showBtn" class="btn-show" disabled>結果表示</button>
+            <button id="resetBtn" class="btn-reset">リセット</button>
+        </div>
+
+        <div id="voteInfo" class="vote-info">
+            投票数: <span id="totalVotes">0</span>
+        </div>
+
+        <div id="resultsDisplay" class="results-display" style="display: none;">
+            <div class="result-item">
+                <div class="result-label left">← 左側</div>
+                <div class="result-bar-container">
+                    <div id="leftBar" class="result-bar left" style="width: 0%">
+                        <span id="leftCount">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="result-item">
+                <div class="result-label right">右側 →</div>
+                <div class="result-bar-container">
+                    <div id="rightBar" class="result-bar right" style="width: 0%">
+                        <span id="rightCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+        let isVotingActive = false;
+
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket接続成功');
+                document.getElementById('connectionStatus').textContent = '接続済み';
+                document.getElementById('connectionStatus').className = 'connection-status connected';
+
+                // 教員として登録
+                ws.send(JSON.stringify({
+                    type: 'register_presenter'
+                }));
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('受信:', data);
+
+                switch(data.type) {
+                    case 'voting_started':
+                        handleVotingStarted();
+                        break;
+                    case 'vote_update':
+                        updateVoteCount(data);
+                        break;
+                    case 'results':
+                        showResults(data);
+                        break;
+                    case 'reset':
+                        handleReset();
+                        break;
+                    case 'state_update':
+                        // サーバーからの状態同期
+                        if (data.state.active) {
+                            handleVotingStarted();
+                            updateVoteCount(data.state);
+                        }
+                        break;
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket切断');
+                document.getElementById('connectionStatus').textContent = '切断されました';
+                document.getElementById('connectionStatus').className = 'connection-status disconnected';
+                // 再接続を試みる
+                setTimeout(connect, 3000);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocketエラー:', error);
+            };
+        }
+
+        function handleVotingStarted() {
+            isVotingActive = true;
+            document.getElementById('status').textContent = '投票受付中';
+            document.getElementById('status').className = 'status active';
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('showBtn').disabled = false;
+            document.getElementById('totalVotes').textContent = '0';
+            document.getElementById('resultsDisplay').style.display = 'none';
+        }
+
+        function updateVoteCount(data) {
+            document.getElementById('totalVotes').textContent = data.totalVotes || 0;
+        }
+
+        function showResults(data) {
+            isVotingActive = false;
+            document.getElementById('status').textContent = '結果表示中';
+            document.getElementById('status').className = 'status results';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('showBtn').disabled = true;
+
+            const total = data.totalVotes || 1; // ゼロ除算を防ぐ
+            const leftPercent = (data.leftCount / total * 100).toFixed(1);
+            const rightPercent = (data.rightCount / total * 100).toFixed(1);
+
+            document.getElementById('leftCount').textContent = data.leftCount;
+            document.getElementById('rightCount').textContent = data.rightCount;
+            document.getElementById('leftBar').style.width = leftPercent + '%';
+            document.getElementById('rightBar').style.width = rightPercent + '%';
+            document.getElementById('resultsDisplay').style.display = 'block';
+        }
+
+        function handleReset() {
+            isVotingActive = false;
+            document.getElementById('status').textContent = '待機中';
+            document.getElementById('status').className = 'status waiting';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('showBtn').disabled = true;
+            document.getElementById('totalVotes').textContent = '0';
+            document.getElementById('resultsDisplay').style.display = 'none';
+        }
+
+        // ボタンイベント
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'start_voting' }));
+            }
+        });
+
+        document.getElementById('showBtn').addEventListener('click', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'show_results' }));
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('投票をリセットしますか？')) {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'reset' }));
+                }
+            }
+        });
+
+        // 初期接続
+        connect();
+    </script>
+</body>
+</html>
